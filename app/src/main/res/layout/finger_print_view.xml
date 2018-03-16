@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:gravity="center_horizontal"
+              android:padding="10dp"
+              android:layout_height="match_parent">
+
+
+    <ImageView
+        android:id="@+id/iv_finger_print"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:src="@mipmap/iv_finger_print"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:text="@string/enter_private_space_by_private_fingerprint"
+        android:layout_marginTop="10dp"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:background="@color/greyline"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:layout_height="0.5dp"/>
+
+    <TextView
+        android:id="@+id/cancel"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:text="@string/cancel"
+        android:textSize="18sp"
+        android:padding="5dp"
+        android:clickable="true"
+        android:onClick="onClick"
+        android:textColor="@color/colorAccent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>

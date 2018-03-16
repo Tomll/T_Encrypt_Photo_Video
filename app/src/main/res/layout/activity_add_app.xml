@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+         >
+
+        <TextView
+            android:id="@+id/tv_selected_mun"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/have_selected"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/done"
+            android:layout_width="44dp"
+            android:layout_height="match_parent"
+            android:text="@string/done"
+            android:layout_alignParentEnd="true"
+            android:gravity="center"
+            android:clickable="true"
+            android:onClick="onClick" />
+    </RelativeLayout>
+    <ListView
+        android:id="@+id/app_listView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </ListView>
+</LinearLayout>
