@@ -1,2 +1,2 @@
-# Encrypt_-
-一个图片视频加密方案
+# Encrypt_Photo-Video
+这是一个图片、视频加密工程
