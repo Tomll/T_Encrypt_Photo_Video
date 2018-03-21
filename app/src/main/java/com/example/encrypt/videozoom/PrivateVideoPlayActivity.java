@@ -12,6 +12,7 @@ import android.widget.VideoView;
 
 import com.example.encrypt.R;
 import com.example.encrypt.activity.BaseActivity;
+import com.example.encrypt.activity.Login;
 
 /**
  * Created by ruipan.dong on 2017/9/26.
@@ -28,11 +29,28 @@ public class PrivateVideoPlayActivity extends BaseActivity {
         setContentView(R.layout.activity_video);
         addAppActivity(PrivateVideoPlayActivity.this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //进行视频播放
         String videoPath = getIntent().getStringExtra("videoPath");
         videoView = (VideoView) findViewById(R.id.video_view);
         mediaController = new MyMediaController(PrivateVideoPlayActivity.this);
         videoView.setMediaController(mediaController);
         playVideo(videoPath);//播放视频
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Login.editor.putBoolean("privVideoAlbumToVideoPlay", false).commit();//还原为false
+        //解密
+        PrivateVideoAlbum.decryptVideosTemporary();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //加密
+        PrivateVideoAlbum.encryptVideosTemporary();
+
     }
 
     @Override

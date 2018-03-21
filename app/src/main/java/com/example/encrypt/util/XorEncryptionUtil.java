@@ -58,40 +58,6 @@ public class XorEncryptionUtil {
         }
     }
 
-    public static File encryptToFile(String sourceFilePath, String destFilePath) {
-        File destFile = new File(destFilePath);
-        int len = REVERSE_LENGTH;
-        try {
-            File f = new File(sourceFilePath);
-            RandomAccessFile raf = new RandomAccessFile(f, "rw");
-            long totalLen = raf.length();
-
-            if (totalLen < REVERSE_LENGTH)
-                len = (int) totalLen;
-
-            FileChannel channel = raf.getChannel();
-            MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, REVERSE_LENGTH);
-            byte tmp;
-            for (int i = 0; i < len; ++i) {
-                byte rawByte = buffer.get(i);
-                tmp = (byte) (rawByte ^ i);
-                buffer.put(i, tmp);
-            }
-            buffer.force();
-            buffer.clear();
-            channel.close();
-            raf.close();
-            if (null != destFilePath) {//如果目标路径不为空，那么表示需要copyFile
-                copyFile(sourceFilePath, destFilePath);
-                return destFile;
-            }
-            return destFile;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return destFile;
-        }
-    }
-
     /**
      * 复制文件(FileChannel的transferTo()方法比一般的文件复制速度快很多)
      *
@@ -135,7 +101,6 @@ public class XorEncryptionUtil {
         //Log.d("XorEncryptionUtil", "copy 文件耗时(l1-l):" + (l1 - l));
         return length == size;
     }
-
 
 
 }

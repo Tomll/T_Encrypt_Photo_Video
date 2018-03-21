@@ -93,7 +93,7 @@ public class VideoAlbumGridViewAdapter extends BaseAdapter {
         }
 
         //加载视频缩略图
-        Glide.with(context).load(dataList.get(position).getPath()).thumbnail(0.5f).into(viewHolder.imageView);
+        Glide.with(context).load(dataList.get(position).getPath()).into(viewHolder.imageView);
         viewHolder.checkBox.setTag(position);
         viewHolder.checkBox.setOnClickListener(new OnClickListener() {
             @Override

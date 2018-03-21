@@ -2,10 +2,14 @@ package com.example.encrypt.photozoom;
 
 import android.animation.ObjectAnimator;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -14,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.encrypt.R;
 import com.example.encrypt.activity.BaseActivity;
+import com.example.encrypt.activity.Login;
 import com.example.encrypt.util.XorEncryptionUtil;
 
 
@@ -30,6 +35,8 @@ public class Gallery extends BaseActivity implements OnClickListener, OnPageChan
     private ProgressDialog progressDialog;
     private GalleryViewPagerAdapter adapter;
     private ViewPagerFixed pager;
+    //广播接收器
+    private SystemKeyEventReceiver receiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,44 +45,40 @@ public class Gallery extends BaseActivity implements OnClickListener, OnPageChan
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_gallery);
         addAppActivity(Gallery.this);
+        initData();
     }
 
     protected void onResume() {
         super.onResume();
+        //恢复privAlbumToGallery为false状态
+        if (isFromPrivateAlbum) {
+            Login.editor.putBoolean("privAlbumToGallery", false).commit();
+            PrivateAlbum.decryptAndEncryptPhotosTemporary();
+        }
         initViewAndCtrl(); //初始化view 和 ctrl
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(receiver);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
-/*    private void showSystemUI() {
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    /**
+     * 初始化数据
+     */
+    public void initData() {
+        intent = getIntent();
+        isFromPrivateAlbum = intent.getBooleanExtra("isFromPrivateAlbum", false);
+        receiver = new SystemKeyEventReceiver();
+        registerReceiver(receiver, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
     }
-    private void hideSystemUI() {
-        // Set the IMMERSIVE flag.
-        // Set the content to appear under the system bars so that the content
-        // doesn't resize when the system bars hide and show.
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }*/
 
     /**
      * 初始化view和适配器ctrl
      */
     private void initViewAndCtrl() {
-        intent = getIntent();
-        isFromPrivateAlbum = intent.getBooleanExtra("isFromPrivateAlbum", false);
         //加密、解密按钮
         progressDialog = new ProgressDialog(Gallery.this);
         buttonAdd = (Button) findViewById(R.id.buttonAdd);
@@ -100,6 +103,38 @@ public class Gallery extends BaseActivity implements OnClickListener, OnPageChan
         int id = intent.getIntExtra("position", 0);
         pager.setCurrentItem(id);
     }
+
+    /**
+     * 系统按键事件广播接收器
+     */
+    private class SystemKeyEventReceiver extends BroadcastReceiver {
+        private final String SYSTEM_DIALOG_REASON_KEY = "reason";
+        private final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
+        private final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
+                Log.d("SystemKeyEventReceiver", "onReceive");
+                String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
+                if (reason == null) {
+                    return;
+                }
+                // Home键
+                if (reason.equals(SYSTEM_DIALOG_REASON_HOME_KEY)) {
+                    Log.d("SystemKeyEventReceiver", "Gallery-home");
+                    PrivateAlbum.encryptPhotosTemporary();
+                }
+                // 最近任务列表键
+                if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
+                    Log.d("SystemKeyEventReceiver", "Gallery-recent");
+                    PrivateAlbum.encryptPhotosTemporary();
+                }
+            }
+        }
+    }
+
 
     //监听ViewPager滑动的三个方法
     @Override
@@ -176,7 +211,7 @@ public class Gallery extends BaseActivity implements OnClickListener, OnPageChan
         ImageItem item = Album.dataList.get(location);
         String imagePath = item.getImagePath();
         String privImagePath = imagePath.replaceFirst("/storage/emulated/0", "/data/data/" + getPackageName() + "/files/storage/emulated/0");
-//        boolean b = AESEncryptionUtil.encryptFile(imagePath, privImagePath);
+        //boolean b = AESEncryptionUtil.encryptFile(imagePath, privImagePath);
         boolean b = XorEncryptionUtil.encrypt(imagePath, privImagePath);
         if (b) {//成功
             if (Bimp.tempSelectBitmap.contains(Album.dataList.get(location))) {
@@ -187,6 +222,8 @@ public class Gallery extends BaseActivity implements OnClickListener, OnPageChan
             Album.delete(item, privImagePath, getContentResolver());
             return true;
         } else {//失败
+            //加密失败：再进行一次异或（相当于事务回退）
+            XorEncryptionUtil.encrypt(imagePath, null);
             return false;
         }
     }
@@ -198,8 +235,9 @@ public class Gallery extends BaseActivity implements OnClickListener, OnPageChan
         ImageItem item = PrivateAlbum.dateList.get(location);
         String privImagePath = item.getImagePath(); //这个私密文件的绝对路径
         String imagePath = privImagePath.replaceFirst("/data/data/" + getPackageName() + "/files/storage/emulated/0", "/storage/emulated/0");
-//        boolean b = AESEncryptionUtil.decryptFile(privImagePath, imagePath);
-        boolean b = XorEncryptionUtil.encrypt(privImagePath, imagePath);
+        //boolean b = AESEncryptionUtil.decryptFile(privImagePath, imagePath);
+        //图片已经处于解密状态了，copy回系统原路径就可以了
+        boolean b = XorEncryptionUtil.copyFile(privImagePath, imagePath);
         if (b) {
             if (Bimp.tempSelectBitmap.contains(PrivateAlbum.dateList.get(location))) {
                 Bimp.tempSelectBitmap.remove(PrivateAlbum.dateList.get(location));

@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -18,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.encrypt.R;
 import com.example.encrypt.activity.BaseActivity;
+import com.example.encrypt.activity.Login;
 import com.example.encrypt.database.DatabaseAdapter;
 import com.example.encrypt.photozoom.Bimp;
 import com.example.encrypt.util.XorEncryptionUtil;
@@ -40,10 +40,9 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
     public static ArrayList<VideoItem> dateList;
     private PrivateVideoAlbumGridViewAdapter privateVideoAlbumGridViewAdapter;
     private static DatabaseAdapter databaseAdapter;//私密数据库管理器
-    private ExecutorService executorService; //线程池
+    private static ExecutorService executorService; //线程池
     private ProgressDialog progressDialog;
     private static TextView tvNoPicture;
-    boolean result = true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,31 +56,39 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);//需要设置这个 flag 才能调用 setStatusBarColor 来设置状态栏颜色
         window.setStatusBarColor(getResources().getColor((R.color.blue)));//设置状态栏颜色
         findViewById(R.id.button_min).setBackgroundColor(getResources().getColor(R.color.blue));
-
+        //初始化数据
         executorService = Executors.newCachedThreadPool();//创建一个缓存线程池
         databaseAdapter = new DatabaseAdapter(PrivateVideoAlbum.this);//数据库操作工具类
         dateList = databaseAdapter.getVideo();
-        decryptAndEncryptVideosTemporary(dateList);//临时将视频解密
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        init();
+        //临时将视频原地解密
+        decryptVideosTemporary();
+        initView();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //只要不是去VideoPlay界面产生的onPause（），一律加密
+        if (!Login.sp.getBoolean("privVideoAlbumToVideoPlay", false)) {
+            encryptVideosTemporary();//退出时，再将视频全部原地加密起来
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        decryptAndEncryptVideosTemporary(dateList);//将视频再加密上
         Bimp.tempSelectVideo.clear();
     }
 
     /**
      * 组件、适配器等各项初始化
      */
-    public void init() {
+    public void initView() {
         TextView tvTitle = (TextView) findViewById(R.id.title);
         tvTitle.setText(R.string.private_video_album);
         tvNoPicture = (TextView) findViewById(R.id.tv_no_picture);
@@ -97,24 +104,57 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
     }
 
     /**
-     * 批量视频临时加解密方法
+     * 批量视频原地解密方法
      */
-    public boolean decryptAndEncryptVideosTemporary(final ArrayList<VideoItem> arrayList) {
-        //long l2 = System.currentTimeMillis();
-        for (final VideoItem item : arrayList) {
-            final String privVideoPath = item.getPath(); //这个私密视频的绝对路径
-            executorService.submit(new Runnable() {
-                @Override
-                public void run() {
-                    boolean b = XorEncryptionUtil.encrypt(privVideoPath, null);
-                    result &= b;
-                }
-            });
+    static boolean result = true;
+
+    public static boolean decryptVideosTemporary() {
+        if (Login.sp.getBoolean("video_encrypt", true)) {//判断是否是加密状态，是，就执行解密
+            //long l2 = System.currentTimeMillis();
+            for (final VideoItem item : dateList) {
+                final String privVideoPath = item.getPath(); //这个私密视频的绝对路径
+                executorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean b = XorEncryptionUtil.encrypt(privVideoPath, null);
+                        if (!b) {//解密失败，再进行一次异或（相当于事务回退）
+                            XorEncryptionUtil.encrypt(privVideoPath, null);
+                        }
+                        result &= b;
+                    }
+                });
+            }
+            //long l = System.currentTimeMillis();
+            //Log.d("PrivateVideoAlbum", "批量临时解密---循环总耗时:" + (l - l2) + " ms");
+            //Log.d("PrivateVideoAlbum", "批量临时解密结果:" + result);
+            Login.editor.putBoolean("video_encrypt", false).commit();
         }
-        long l = System.currentTimeMillis();
-        //Log.d("PrivateVideoAlbum", "批量临时解密---循环总耗时:" + (l - l2) + " ms");
-        //Log.d("PrivateVideoAlbum", "批量临时解密结果:" + result);
         return result;
+    }
+
+    /**
+     * 批量视频原地加密方法
+     */
+    static boolean result1 = true;
+
+    public static boolean encryptVideosTemporary() {
+        if (!Login.sp.getBoolean("video_encrypt", false)) {//判断是否是解密状态，是，就执行加密
+            for (final VideoItem item : dateList) {
+                final String privVideoPath = item.getPath(); //这个私密视频的绝对路径
+                executorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean b = XorEncryptionUtil.encrypt(privVideoPath, null);
+                        if (!b) {//加密失败，再进行一次异或（相当于事务回退）
+                            XorEncryptionUtil.encrypt(privVideoPath, null);
+                        }
+                        result1 &= b;
+                    }
+                });
+            }
+            Login.editor.putBoolean("video_encrypt", true).commit();
+        }
+        return result1;
     }
 
     @Override
@@ -137,7 +177,6 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
                 break;
             default:
                 break;
-
         }
     }
 
@@ -166,16 +205,15 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            boolean result;
-            result = decryptVideoList(listPrivVideo); //解密视频集合
+            boolean result = decryptVideoList(listPrivVideo); //解密视频集合
             int totalTime = 0;
             while (result && getApplicationContext().getContentResolver().
                     query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, null, null, null, null).getCount()
                     != (startSize + listPrivVideo.size()) && totalTime < listPrivVideo.size() / 2) {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                     totalTime += 2;
-                    Log.d("DecryptionTask", "totalTime:" + totalTime);
+                    //Log.d("DecryptionTask", "totalTime:" + totalTime);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -207,7 +245,7 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
             Future<Boolean> future = executorService.submit(new Callable<Boolean>() {
                 @Override
                 public Boolean call() {
-//                    boolean b = XorEncryptionUtil.encrypt(privVideoPath, videoPath);
+                    //boolean b = XorEncryptionUtil.encrypt(privVideoPath, videoPath);
                     //文件已经处于解密状态，copy到外部原路径，再insert回系统数据库，即可
                     boolean b = XorEncryptionUtil.copyFile(privVideoPath, videoPath);
                     if (b) {//解密成功，删除私密视频

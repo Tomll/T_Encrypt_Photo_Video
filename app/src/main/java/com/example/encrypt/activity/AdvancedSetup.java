@@ -1,6 +1,9 @@
 package com.example.encrypt.activity;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -17,15 +20,16 @@ import static com.example.encrypt.activity.Login.ChangePrivateMarkFromAdvancedSe
  */
 public class AdvancedSetup extends BaseActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
+    public static FingerprintManager mFingerprintManager;
     RelativeLayout rv1;
-    Switch mSwitch1, /*mSwitch2, mSwitch3,*/
-            mSwitch4;
+    Switch mSwitch1, /*mSwitch2, mSwitch3,*/mSwitch4;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_advance_setup);
         addAppActivity(AdvancedSetup.this);
+        mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
         initView();
     }
 
@@ -33,9 +37,10 @@ public class AdvancedSetup extends BaseActivity implements View.OnClickListener,
     /**
      * 初始化view
      */
+    @SuppressLint("NewApi")
     private void initView() {
         rv1 = (RelativeLayout) findViewById(R.id.rv1);
-        if (!Login.hasFingerMode()) {
+        if (!mFingerprintManager.isHardwareDetected()) {//没有指纹传感器，就把指设置选项GONE掉
             rv1.setVisibility(View.GONE);
         }
         mSwitch1 = (Switch) findViewById(R.id.switch1);

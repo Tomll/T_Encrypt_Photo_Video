@@ -11,8 +11,8 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.example.encrypt.R;
+import com.example.encrypt.activity.Login;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -22,26 +22,21 @@ import java.util.ArrayList;
 public class PrivateAlbumGridViewAdapter extends BaseAdapter {
 
     private ArrayList<ImageItem> listPrivFlies = new ArrayList<ImageItem>();
-    private ArrayList<ImageItem> selectedDataList = new ArrayList<ImageItem>();
     private Context mContext;
-    //private BitmapCache cache;
-    //private DisplayMetrics dm;
 
     public PrivateAlbumGridViewAdapter(Context c, ArrayList<ImageItem> list) {
         mContext = c;
         listPrivFlies = list;
-        //cache = new BitmapCache();
-        //dm = new DisplayMetrics();
-        //((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(dm);
     }
 
     /**
      * 适配器 数据全选、取消全选 的方法
+     *
      * @param isSelectedAll
      */
-    public void selectAll(boolean isSelectedAll){
+    public void selectAll(boolean isSelectedAll) {
         Bimp.tempSelectBitmap.clear();
-        if (isSelectedAll){
+        if (isSelectedAll) {
             Bimp.tempSelectBitmap.addAll(listPrivFlies);
         }
         notifyDataSetChanged();
@@ -49,24 +44,26 @@ public class PrivateAlbumGridViewAdapter extends BaseAdapter {
 
     /**
      * 适配器 获取全部数据集 的方法
+     *
      * @return
      */
-    public ArrayList<ImageItem> getDataList(){
+    public ArrayList<ImageItem> getDataList() {
         return listPrivFlies;
     }
 
     /**
      * 适配器 获取已选数据集 的方法
+     *
      * @return
      */
-    public ArrayList<ImageItem> getSelectedData(){
+    public ArrayList<ImageItem> getSelectedData() {
         return Bimp.tempSelectBitmap;
     }
 
     /**
      * 解密完成后，刷新适配器的方法
      */
-    public void refreshDataAfterDecrypt(){
+    public void refreshDataAfterDecrypt() {
         listPrivFlies.removeAll(Bimp.tempSelectBitmap);
         notifyDataSetChanged();
         Bimp.tempSelectBitmap.clear();
@@ -74,7 +71,7 @@ public class PrivateAlbumGridViewAdapter extends BaseAdapter {
 
 
     public int getCount() {
-        if (listPrivFlies.size() == 0){
+        if (listPrivFlies.size() == 0) {
             PrivateAlbum.showNoPictureTip();
         }
         return listPrivFlies.size();
@@ -88,22 +85,6 @@ public class PrivateAlbumGridViewAdapter extends BaseAdapter {
         return position;
     }
 
-//    BitmapCache.ImageCallback callback = new BitmapCache.ImageCallback() {
-//        @Override
-//        public void imageLoad(ImageView imageView, Bitmap bitmap, Object... params) {
-//            if (imageView != null && bitmap != null) {
-//                String url = (String) params[0];
-//                if (url != null && url.equals((String) imageView.getTag())) {
-//                    ((ImageView) imageView).setImageBitmap(bitmap);
-//                } else {
-//                    Log.e(TAG, "callback, bmp not match");
-//                }
-//            } else {
-//                Log.e(TAG, "callback, bmp null");
-//            }
-//        }
-//    };
-
     public View getView(final int position, View convertView, ViewGroup parent) {
         final ViewHolder viewHolder;
         if (convertView == null) {
@@ -116,34 +97,13 @@ public class PrivateAlbumGridViewAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-/*        String path;
-        if (dataList != null && dataList.size() > position)
-            path = dataList.get(position).imagePath;
-        else
-            path = "camera_default";
-        if (path.contains("camera_default")) {
-            viewHolder.imageView.setImageResource(R.drawable.plugin_camera_no_pictures);
-        } else {
-            final ImageItem item = dataList.get(position);
-            viewHolder.imageView.setTag(item.imagePath);
-            cache.displayBmp(viewHolder.imageView, item.thumbnailPath, item.imagePath,callback);
-        }*/
-
-        String privImagePath = listPrivFlies.get(position).getImagePath();
-        String fileName = privImagePath.substring(privImagePath.lastIndexOf("/") + 1);
-        String imagePath = "/data/data/" + mContext.getPackageName() + "/files/" + fileName;
-        if (new File(imagePath).exists()){
-            Glide.with(mContext).load(imagePath).thumbnail(0.5f).into(viewHolder.imageView);
-        }else {
-            viewHolder.imageView.setImageResource(R.color.greytext);
-        }
-
+        Glide.with(mContext).load(listPrivFlies.get(position).getImagePath()).into(viewHolder.imageView);
         viewHolder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (viewHolder.checkBox.isChecked()){
+                if (viewHolder.checkBox.isChecked()) {
                     Bimp.tempSelectBitmap.add(listPrivFlies.get(position));
-                }else {
+                } else {
                     Bimp.tempSelectBitmap.remove(listPrivFlies.get(position));
                 }
             }
@@ -158,7 +118,8 @@ public class PrivateAlbumGridViewAdapter extends BaseAdapter {
         viewHolder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mContext.startActivity(new Intent(mContext, Gallery.class).putExtra("position",position).putExtra("isFromPrivateAlbum",true));
+                Login.editor.putBoolean("privAlbumToGallery", true).commit();
+                mContext.startActivity(new Intent(mContext, Gallery.class).putExtra("position", position).putExtra("isFromPrivateAlbum", true));
             }
         });
         return convertView;

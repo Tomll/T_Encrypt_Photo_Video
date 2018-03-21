@@ -8,9 +8,6 @@ import android.view.ViewGroup.LayoutParams;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.encrypt.util.XorEncryptionUtil;
-
-import java.io.File;
 
 /**
  * 自定义的PagerAdapter：用于GalleryActivity界面的ViewPagerFixed的适配
@@ -49,31 +46,18 @@ public class GalleryViewPagerAdapter extends PagerAdapter {
             }
         });
         if (Gallery.isFromPrivateAlbum) {
-            ImageItem item = PrivateAlbum.dateList.get(position);
-            String privImagePath = item.getImagePath();
-            String fileName = privImagePath.substring(privImagePath.lastIndexOf("/") + 1);
-            String imagePath = "/data/data/" + mContext.getPackageName() + "/files/" + fileName;
-            //缓存文件夹中如果有该文件，就不需要再次解密了
-            if (new File(imagePath).exists()) {
-                if (imagePath.endsWith(".gif")){
-                    Glide.with(mContext).load(imagePath).asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE).into(photoView);
-                }else {
-                    Glide.with(mContext).load(imagePath).into(photoView);
-                }
+            String privImagePath = PrivateAlbum.dateList.get(position).getImagePath();
+            if (privImagePath.endsWith(".gif")) {
+                Glide.with(mContext).load(privImagePath).asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE).into(photoView);
             } else {
-//				File file = AESEncryptionUtil.decryptFile2(privImagePath, imagePath);
-                File file = XorEncryptionUtil.encryptToFile(privImagePath, imagePath);
-                if (imagePath.endsWith(".gif")){
-                    Glide.with(mContext).load(file).asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE).into(photoView);
-                }else {
-                    Glide.with(mContext).load(file).into(photoView);
-                }
+                Glide.with(mContext).load(privImagePath).into(photoView);
             }
         } else {
+            String imagePath = Album.dataList.get(position).getImagePath();
             if (Album.dataList.get(position).getImagePath().endsWith(".gif")) {
-                Glide.with(mContext).load(((ImageItem) Album.dataList.get(position)).getImagePath()).asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE).into(photoView);
+                Glide.with(mContext).load(imagePath).asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE).into(photoView);
             } else {
-                Glide.with(mContext).load(((ImageItem) Album.dataList.get(position)).getImagePath()).into(photoView);
+                Glide.with(mContext).load(imagePath).into(photoView);
             }
         }
         photoView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -85,7 +69,7 @@ public class GalleryViewPagerAdapter extends PagerAdapter {
         //super.destroyItem(container, position, object);
     }
 
-/*	int mChildCount;
+	/*int mChildCount;
     @Override
 	public void notifyDataSetChanged() {
 		mChildCount = getCount();

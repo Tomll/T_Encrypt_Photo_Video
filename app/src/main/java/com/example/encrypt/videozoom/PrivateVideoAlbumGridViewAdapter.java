@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.example.encrypt.R;
+import com.example.encrypt.activity.Login;
 import com.example.encrypt.photozoom.Bimp;
 
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ public class PrivateVideoAlbumGridViewAdapter extends BaseAdapter {
         }
 
         //加载视频缩略图
-        Glide.with(mContext).load(listPrivFlies.get(position).getPath()).thumbnail(0.5f).placeholder(R.color.greytext).into(viewHolder.imageView);
+        Glide.with(mContext).load(listPrivFlies.get(position).getPath()).into(viewHolder.imageView);
         viewHolder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -102,6 +103,7 @@ public class PrivateVideoAlbumGridViewAdapter extends BaseAdapter {
         viewHolder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Login.editor.putBoolean("privVideoAlbumToVideoPlay", true).commit();
                 //跳到VideoActivity播放视频
                 mContext.startActivity(new Intent(mContext, PrivateVideoPlayActivity.class).putExtra("videoPath", listPrivFlies.get(position).getPath()));
             }

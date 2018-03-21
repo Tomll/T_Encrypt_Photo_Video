@@ -127,7 +127,7 @@ public class AlbumGridViewAdapter extends BaseAdapter {
 			final ImageItem item = dataList.get(position);
 //			viewHolder.imageView.setTag(item.imagePath);
 //			cache.displayBmp(viewHolder.imageView, item.thumbnailPath, item.imagePath,callback);
-            Glide.with(context).load(item.imagePath).thumbnail(0.5f).placeholder(R.color.greytext).into(viewHolder.imageView);
+            Glide.with(context).load(item.imagePath).into(viewHolder.imageView);
         }
 		viewHolder.checkBox.setTag(position);
 		viewHolder.checkBox.setOnClickListener(new OnClickListener() {

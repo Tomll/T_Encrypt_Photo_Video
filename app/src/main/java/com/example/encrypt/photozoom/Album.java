@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
@@ -73,7 +72,7 @@ public class Album extends BaseActivity implements OnClickListener {
         if (null != progressDialog && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
-/*        if (null != mTask && !mTask.isCancelled()){
+/*        if (null != mTask && !mTask.isCancelled()){  注释掉此段，不取消mTask,让加解密在后台继续执行完成
             mTask.cancel(true);
         }*/
     }
@@ -132,18 +131,17 @@ public class Album extends BaseActivity implements OnClickListener {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            boolean result = false;
-            result = encryptFileList(mImageArrayList); //加密文件集合
-/*            int totalTime = 0;
+            boolean result = encryptFileList(mImageArrayList); //加密文件集合
+            int totalTime = 0;
             while (result && databaseAdapter.getPhoto().size() != (startSize + mImageArrayList.size()) && totalTime < mImageArrayList.size()) {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                     totalTime += 2;
                     //Log.d("EncryptionTask", "totalTime:" + totalTime);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }*/
+            }
             return result;
         }
 
@@ -160,55 +158,38 @@ public class Album extends BaseActivity implements OnClickListener {
 
     /**
      * 加密文件集合
-     *
      * @param arrayList
      * @return
      */
     boolean result = true;//最后返回的加密结果
 
-/*    public boolean encryptFileList(ArrayList<ImageItem> arrayList) {
-        //long l2 = System.currentTimeMillis();
+    public boolean encryptFileList(ArrayList<ImageItem> arrayList) {
+//        long l2 = System.currentTimeMillis();
         for (final ImageItem item : arrayList) {
             final String imagePath = item.getImagePath();
             final String privImagePath = imagePath.replaceFirst("/storage/emulated/0", "/data/data/" + getPackageName() + "/files/storage/emulated/0");
             executorService.submit(new Runnable() {
                 @Override
                 public void run() {
-//                    boolean b = AESEncryptionUtil.encryptFile(imagePath, privImagePath);
+                    //boolean b = AESEncryptionUtil.encryptFile(imagePath, privImagePath);
                     boolean b = XorEncryptionUtil.encrypt(imagePath, privImagePath);
                     if (b) {//加密成功，删除源文件
-                        delete(item,privImagePath,getContentResolver());
+                        delete(item, privImagePath, getContentResolver());
                     } else { //加密失败，设置结果为false
+                        //加密失败：再进行一次异或解密（相当于事务回退）
+                        XorEncryptionUtil.encrypt(imagePath, null);
                         result = b;
                     }
                 }
             });
         }
-        //long l = System.currentTimeMillis();
-        //Log.d("dongrp", "加密for循环耗时:" + (l - l2) + " ms");
-        return result;
-    }*/
-
-    //同步加密
-    public boolean encryptFileList(ArrayList<ImageItem> arrayList) {
-        for (final ImageItem item : arrayList) {
-            final String imagePath = item.getImagePath();
-            final String privImagePath = imagePath.replaceFirst("/storage/emulated/0", "/data/data/" + getPackageName() + "/files/storage/emulated/0");
-            boolean b = XorEncryptionUtil.encrypt(imagePath, privImagePath);
-            Log.d("Album", "b:" + b);
-            if (b) {//加密成功，删除源文件
-                delete(item, privImagePath, getContentResolver());
-            } else { //加密失败，设置结果为false
-                result = b;
-            }
-        }
+//        long l = System.currentTimeMillis();
+//        Log.d("dongrp", "异步加密for循环耗时:" + (l - l2) + " ms");
         return result;
     }
 
-
     /**
      * 明文件删除、明文件数据库条目删除、私密数据库插入
-     *
      * @param item
      */
     public static void delete(ImageItem item, String privImagePath, ContentResolver contentResolver) {
@@ -219,7 +200,7 @@ public class Album extends BaseActivity implements OnClickListener {
         Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         contentResolver.delete(baseUri, "_id=?", new String[]{item.getImageId()});
         //将加密后的文件条目插入私密数据库
-        Log.d("VideoAlbum", item.toString());
+//        Log.d("VideoAlbum", item.toString());
         ContentValues contentValues = new ContentValues();
         contentValues.put(PsDatabaseHelper.FilesClumns._ID, Integer.valueOf(item.getImageId()));
         contentValues.put(PsDatabaseHelper.FilesClumns._DATA, privImagePath);
@@ -239,5 +220,6 @@ public class Album extends BaseActivity implements OnClickListener {
         }
         databaseAdapter.insertPhoto(contentValues);
     }
+
 
 }

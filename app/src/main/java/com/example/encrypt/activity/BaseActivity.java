@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -30,25 +29,16 @@ public class BaseActivity extends AppCompatActivity {
 //        requestWindowFeature(Window.FEATURE_NO_TITLE);//隐藏TitleBar
 //        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);//透明状态栏
         receiver = new SystemKeyEventReceiver();
-        registerReceiver();
+        //注册系统按键广播
+        registerReceiver(receiver, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unRegisterReceiver();
-    }
-
-    //注册广播
-    public void registerReceiver() {
-        registerReceiver(receiver, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-        Log.d("BaseActivity", "registerReceiver");
-    }
-
-    //反注册广播
-    public void unRegisterReceiver() {
+        //反注册广播
         unregisterReceiver(receiver);
-        Log.d("BaseActivity", "unRegisterReceiver");
     }
 
     /**
@@ -69,11 +59,11 @@ public class BaseActivity extends AppCompatActivity {
                 }
                 // Home键
                 if (reason.equals(SYSTEM_DIALOG_REASON_HOME_KEY) && Login.sp.getBoolean("fastExit", false)) {
-                    exitApp(BaseActivity.this);
+                    exitApp();
                 }
                 // 最近任务列表键
                 if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS) && Login.sp.getBoolean("fastExit", false)) {
-                    exitApp(BaseActivity.this);
+                    exitApp();
                 }
             }
         }
@@ -104,7 +94,7 @@ public class BaseActivity extends AppCompatActivity {
     /**
      * 退出应用程序
      */
-    public static void exitApp(Context context) {
+    public static void exitApp() {
         for (Activity ac : activityList) {
             if (!ac.isFinishing()) {
                 ac.finish();
@@ -117,7 +107,7 @@ public class BaseActivity extends AppCompatActivity {
 
 
 /*    *//**
-     * 退出应用
+     * 通过回退栈的方式退出应用
      *//*
     //Transage <zhaoxin>  add  for  privateapp  2017-9-25 begin
     private ArrayList<AppInfo> appList = new ArrayList<AppInfo>();// 数据

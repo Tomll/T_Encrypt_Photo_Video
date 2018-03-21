@@ -51,36 +51,19 @@ public class VideoAlbum extends BaseActivity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album);
         addAppActivity(VideoAlbum.this);
-
         //视频相关界面统一用蓝色调，以下逻辑修改状态栏颜色
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);//取消设置透明状态栏,使 ContentView 内容不再覆盖状态栏
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);//需要设置这个 flag 才能调用 setStatusBarColor 来设置状态栏颜色
         window.setStatusBarColor(getResources().getColor((R.color.blue)));//设置状态栏颜色
         findViewById(R.id.button_add).setBackgroundColor(getResources().getColor(R.color.blue));
-
-        executorService = Executors.newFixedThreadPool(20);//创建一个缓存线程池
-        databaseAdapter = new DatabaseAdapter(VideoAlbum.this);//数据库操作工具类
+        initData();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        init();
-    }
-
-    /**
-     * view初始化
-     */
-    private void init() {
-        TextView tvTitle = (TextView) findViewById(R.id.title);
-        tvTitle.setText(R.string.select_video);
-        //系统中所有视频数据
-        videoList = AlbumHelper.getSystemVideoList(VideoAlbum.this);
-        //创建gridView并绑定适配器
-        gridView = (GridView) findViewById(R.id.album_GridView);
-        gridVideoAdapter = new VideoAlbumGridViewAdapter(this, videoList);
-        gridView.setAdapter(gridVideoAdapter);
+        initView();
     }
 
     @Override
@@ -90,10 +73,34 @@ public class VideoAlbum extends BaseActivity implements OnClickListener {
         if (null != progressDialog && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
-/*        if (null != mTask && !mTask.isCancelled()){
+        /*if (null != mTask && !mTask.isCancelled()){
             mTask.cancel(true);
         }*/
     }
+
+    /**
+     * 初始化数据
+     */
+    public void initData(){
+        executorService = Executors.newFixedThreadPool(20);//创建一个缓存线程池
+        databaseAdapter = new DatabaseAdapter(VideoAlbum.this);//数据库操作工具类
+        //系统中所有视频数据
+        videoList = AlbumHelper.getSystemVideoList(VideoAlbum.this);
+    }
+
+    /**
+     * 初始化 view、adapter
+     */
+    private void initView() {
+        TextView tvTitle = (TextView) findViewById(R.id.title);
+        tvTitle.setText(R.string.select_video);
+        //创建gridView并绑定适配器
+        gridView = (GridView) findViewById(R.id.album_GridView);
+        gridVideoAdapter = new VideoAlbumGridViewAdapter(this, videoList);
+        gridView.setAdapter(gridVideoAdapter);
+    }
+
+
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -149,12 +156,11 @@ public class VideoAlbum extends BaseActivity implements OnClickListener {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            boolean result;
-            result = encryptVideoList(mVideoArrayList); //加密视频集合
+            boolean result = encryptVideoList(mVideoArrayList); //加密视频集合
             int totalTime = 0;
             while (result && databaseAdapter.getPhoto().size() != (startSize + mVideoArrayList.size()) && totalTime < mVideoArrayList.size()) {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                     totalTime += 2;
                     Log.d("EncryptionTask", "totalTime:" + totalTime);
                 } catch (InterruptedException e) {
@@ -196,6 +202,9 @@ public class VideoAlbum extends BaseActivity implements OnClickListener {
                     boolean b = XorEncryptionUtil.encrypt(videoPath, privVideoPath);
                     if (b) {//加密成功，移动视频文件到私密路径
                         deleteVideo(item, privVideoPath, getContentResolver());
+                    }else {
+                        //加密失败：再进行一次异或解密（相当于事务回退）
+                        XorEncryptionUtil.encrypt(videoPath, null);
                     }
                     return b;
                 }
