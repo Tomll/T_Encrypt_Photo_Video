@@ -58,11 +58,11 @@ public class BaseActivity extends AppCompatActivity {
                     return;
                 }
                 // Home键
-                if (reason.equals(SYSTEM_DIALOG_REASON_HOME_KEY) && Login.sp.getBoolean("fastExit", false)) {
+                if (reason.equals(SYSTEM_DIALOG_REASON_HOME_KEY) && BseApplication.sp.getBoolean("fastExit", false)) {
                     exitApp();
                 }
                 // 最近任务列表键
-                if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS) && Login.sp.getBoolean("fastExit", false)) {
+                if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS) && BseApplication.sp.getBoolean("fastExit", false)) {
                     exitApp();
                 }
             }

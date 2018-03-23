@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.example.encrypt.R;
 import com.example.encrypt.activity.BaseActivity;
+import com.example.encrypt.activity.BseApplication;
 import com.example.encrypt.activity.Login;
 import com.example.encrypt.database.DatabaseAdapter;
 import com.example.encrypt.util.XorEncryptionUtil;
@@ -69,7 +70,7 @@ public class PrivateAlbum extends BaseActivity implements View.OnClickListener {
     protected void onPause() {
         super.onPause();
         //只要不是去Gallery界面产生的onPause,一律执行加密
-        if (!Login.sp.getBoolean("privAlbumToGallery", false)) {
+        if (!BseApplication.sp.getBoolean("privAlbumToGallery", false)) {
             encryptPhotosTemporary();//退出时，再将图片全部原路径加密起来
         }
     }
@@ -241,7 +242,7 @@ public class PrivateAlbum extends BaseActivity implements View.OnClickListener {
     static boolean result2 = true;
 
     public static boolean decryptAndEncryptPhotosTemporary() {
-        if (Login.sp.getBoolean("photo_encrypt", true)) {//判断是否是加密状态，是，就执行解密
+        if (BseApplication.sp.getBoolean("photo_encrypt", true)) {//判断是否是加密状态，是，就执行解密
             for (ImageItem item : dateList) {
                 final String privImagePath = item.getImagePath();
                 //String fileName = privImagePath.substring(privImagePath.lastIndexOf("/") + 1);
@@ -257,7 +258,7 @@ public class PrivateAlbum extends BaseActivity implements View.OnClickListener {
                     }
                 });
             }
-            Login.editor.putBoolean("photo_encrypt", false).commit();
+            BseApplication.editor.putBoolean("photo_encrypt", false).commit();
         }
         return result2;
     }
@@ -269,7 +270,7 @@ public class PrivateAlbum extends BaseActivity implements View.OnClickListener {
     static boolean result3 = true;
 
     public static boolean encryptPhotosTemporary() {
-        if (!Login.sp.getBoolean("photo_encrypt", false)) {//判断是否是解密状态，是，就执行加密
+        if (!BseApplication.sp.getBoolean("photo_encrypt", false)) {//判断是否是解密状态，是，就执行加密
             for (ImageItem item : dateList) {
                 final String privImagePath = item.getImagePath();
                 //String fileName = privImagePath.substring(privImagePath.lastIndexOf("/") + 1);
@@ -285,7 +286,7 @@ public class PrivateAlbum extends BaseActivity implements View.OnClickListener {
                     }
                 });
             }
-            Login.editor.putBoolean("photo_encrypt", true).commit();
+            BseApplication.editor.putBoolean("photo_encrypt", true).commit();
         }
         return result3;
     }

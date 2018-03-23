@@ -48,10 +48,10 @@ public class AdvancedSetup extends BaseActivity implements View.OnClickListener,
 //        mSwitch3 = (Switch) findViewById(R.id.switch3);
         mSwitch4 = (Switch) findViewById(R.id.switch4);
         // 根据xml中保存的开关状态 设置switch状态
-        mSwitch1.setChecked(Login.sp.getBoolean("enterByPrivateFingerprint", false));
-//        mSwitch2.setChecked(Login.sp.getBoolean("enterByDoubleDecline", false));
+        mSwitch1.setChecked(BseApplication.sp.getBoolean("enterByPrivateFingerprint", false));
+//        mSwitch2.setChecked(BseApplication.sp.getBoolean("enterByDoubleDecline", false));
 //        mSwitch3.setChecked(ImportExportUtils.isVcf(this));
-        mSwitch4.setChecked(Login.sp.getBoolean("fastExit", false));
+        mSwitch4.setChecked(BseApplication.sp.getBoolean("fastExit", false));
         //checkChange监听
         mSwitch1.setOnCheckedChangeListener(this);
 //        mSwitch2.setOnCheckedChangeListener(this);
@@ -64,19 +64,19 @@ public class AdvancedSetup extends BaseActivity implements View.OnClickListener,
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId()) {
             case R.id.switch1: // 私密指纹 开关
-                Login.editor.putBoolean("enterByPrivateFingerprint", isChecked);
+                BseApplication.editor.putBoolean("enterByPrivateFingerprint", isChecked);
                 break;
 /*            case R.id.switch2: // 双指下滑 开关
-                Login.editor.putBoolean("enterByDoubleDecline", isChecked);
+                BseApplication.editor.putBoolean("enterByDoubleDecline", isChecked);
                 break;
             case R.id.switch3: // 是否保存cvf 开关
-                Login.editor.putBoolean(ImportExportUtils.KEY_SHARE_SAVEVCF, isChecked);
+                BseApplication.editor.putBoolean(ImportExportUtils.KEY_SHARE_SAVEVCF, isChecked);
                 break;*/
             case R.id.switch4: // 快速退出 开关
-                Login.editor.putBoolean("fastExit", isChecked);
+                BseApplication.editor.putBoolean("fastExit", isChecked);
                 break;
         }
-        Login.editor.commit();
+        BseApplication.editor.commit();
 
     }
 

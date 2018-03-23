@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.encrypt.R;
 import com.example.encrypt.activity.BaseActivity;
+import com.example.encrypt.activity.BseApplication;
 import com.example.encrypt.activity.Login;
 import com.example.encrypt.util.XorEncryptionUtil;
 
@@ -52,7 +53,7 @@ public class Gallery extends BaseActivity implements OnClickListener, OnPageChan
         super.onResume();
         //恢复privAlbumToGallery为false状态
         if (isFromPrivateAlbum) {
-            Login.editor.putBoolean("privAlbumToGallery", false).commit();
+            BseApplication.editor.putBoolean("privAlbumToGallery", false).commit();
             PrivateAlbum.decryptAndEncryptPhotosTemporary();
         }
         initViewAndCtrl(); //初始化view 和 ctrl

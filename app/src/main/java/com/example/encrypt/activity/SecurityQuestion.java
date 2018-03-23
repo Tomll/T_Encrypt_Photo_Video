@@ -46,8 +46,8 @@ public class SecurityQuestion extends BaseActivity implements View.OnClickListen
         list.add(getString(R.string.name_of_class_teacher));
         list.add(getString(R.string.favorite_dish));
         list.add(getString(R.string.name_of_pet));
-        String user_question = Login.sp.getString("user_question", "");
-        if (Login.sp.getBoolean(Login.FirstRun, true)) {
+        String user_question = BseApplication.sp.getString("user_question", "");
+        if (BseApplication.sp.getBoolean(Login.FirstRun, true)) {
             list.add(getString(R.string.user_question));
         } else if (!TextUtils.isEmpty(user_question)) {
             list.add(user_question);
@@ -66,15 +66,15 @@ public class SecurityQuestion extends BaseActivity implements View.OnClickListen
         // spinner注册item的选中监听
         spinner.setOnItemSelectedListener(this);
         // 非第一次运行app:展示的密保为上次用户选择的密保问题
-        if (!Login.sp.getBoolean(Login.FirstRun, true)) {
-            spinner.setSelection(Login.sp.getInt(SelectedPosition, 0));// 取出上次记录的密保问题的位置
+        if (!BseApplication.sp.getBoolean(Login.FirstRun, true)) {
+            spinner.setSelection(BseApplication.sp.getInt(SelectedPosition, 0));// 取出上次记录的密保问题的位置
         }
     }
 
     // spinner的item被选中后，回调的两个方法
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if (Login.sp.getBoolean(Login.FirstRun, true) && position == list.size() - 1) { // 选择最后一项“自定义问题”
+        if (BseApplication.sp.getBoolean(Login.FirstRun, true) && position == list.size() - 1) { // 选择最后一项“自定义问题”
             final EditText editText = new EditText(this);
             editText.setHint(getString(R.string.please_input_user_question));
             final AlertDialog alertDialog = new AlertDialog.Builder(SecurityQuestion.this).setCancelable(false)
@@ -92,8 +92,8 @@ public class SecurityQuestion extends BaseActivity implements View.OnClickListen
                 @Override
                 public void onClick(View v) {
                     if (!TextUtils.isEmpty(editText.getText().toString().trim())) {
-                        Login.editor.putString("user_question", editText.getText().toString().trim());
-                        Login.editor.commit();
+                        BseApplication.editor.putString("user_question", editText.getText().toString().trim());
+                        BseApplication.editor.commit();
                         if (list.size() == 5) {
                             list.remove(list.size() - 1);
                             list.add(editText.getText().toString().trim());
@@ -146,9 +146,9 @@ public class SecurityQuestion extends BaseActivity implements View.OnClickListen
             return;
         }
         // 非第一次运行app
-        if (!Login.sp.getBoolean(Login.FirstRun, true)) {
+        if (!BseApplication.sp.getBoolean(Login.FirstRun, true)) {
             // 保存的密保答案
-            String saveAnswer = Login.sp.getString(spinner.getSelectedItem().toString(), "");
+            String saveAnswer = BseApplication.sp.getString(spinner.getSelectedItem().toString(), "");
             // 你输入的密保答案
             String yourAnswer = editText.getText().toString().trim();
             if (saveAnswer.equals(yourAnswer)) { // 密保匹配通过
@@ -161,11 +161,11 @@ public class SecurityQuestion extends BaseActivity implements View.OnClickListen
             }
         }
         // 第一次运行app
-        else if (Login.sp.getBoolean(Login.FirstRun, true)) {
-            Login.editor.putString(spinner.getSelectedItem().toString(), editText.getText().toString().trim());// 记录密保问题
-            Login.editor.putInt(SelectedPosition, spinner.getSelectedItemPosition());// 记录选择的密保问题的位置
-            Login.editor.putBoolean(Login.FirstRun, false);
-            Login.editor.commit();
+        else if (BseApplication.sp.getBoolean(Login.FirstRun, true)) {
+            BseApplication.editor.putString(spinner.getSelectedItem().toString(), editText.getText().toString().trim());// 记录密保问题
+            BseApplication.editor.putInt(SelectedPosition, spinner.getSelectedItemPosition());// 记录选择的密保问题的位置
+            BseApplication.editor.putBoolean(Login.FirstRun, false);
+            BseApplication.editor.commit();
             Toast.makeText(this, getString(R.string.successful_set_private_question), Toast.LENGTH_LONG).show();
             startActivity(new Intent(SecurityQuestion.this, Main.class));
             finish();

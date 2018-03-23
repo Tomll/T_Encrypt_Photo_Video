@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.example.encrypt.R;
+import com.example.encrypt.activity.BseApplication;
 import com.example.encrypt.activity.Login;
 
 import java.util.ArrayList;
@@ -118,7 +119,7 @@ public class PrivateAlbumGridViewAdapter extends BaseAdapter {
         viewHolder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Login.editor.putBoolean("privAlbumToGallery", true).commit();
+                BseApplication.editor.putBoolean("privAlbumToGallery", true).commit();
                 mContext.startActivity(new Intent(mContext, Gallery.class).putExtra("position", position).putExtra("isFromPrivateAlbum", true));
             }
         });

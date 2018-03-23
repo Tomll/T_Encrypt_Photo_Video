@@ -22,6 +22,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,15 +90,6 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
         }
         initData();
         initView();
-/*        //注册指纹监听
-        if (!isFirstRun && hasFingerMode() && sp.getBoolean("enterByPrivateFingerprint", false)
-                && !resetPrivateMarkFromAdvancedSetup && !resetPrivateMarkFromSecurityQuestion) {
-            btFingerprint.setVisibility(View.VISIBLE);
-            tip_finger_print_login.setVisibility(View.VISIBLE);
-        } else if (isFirstRun) {
-            //app首次运行,默认打开指纹登录开关
-            Login.editor.putBoolean("enterByPrivateFingerprint", true).commit();
-        }*/
     }
 
     @Override
@@ -172,7 +164,7 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
             tip_finger_print_login.setVisibility(View.VISIBLE);
         } else if (isFirstRun) {
             //app首次运行,默认打开指纹登录开关
-            Login.editor.putBoolean("enterByPrivateFingerprint", true).commit();
+            BseApplication.editor.putBoolean("enterByPrivateFingerprint", true).commit();
         }
     }
 
@@ -226,7 +218,7 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
      */
     public void loginOrResetPwd() {
         if (!isFirstRun && !isChangePrivateMark) { // 日常登录
-            if (md5(md5(editText1.getText().toString().trim())).equals(Login.sp.getString(PRIVATE_SPACE_PWD, null))) { // 验证成功
+            if (md5(md5(editText1.getText().toString().trim())).equals(BseApplication.sp.getString(PRIVATE_SPACE_PWD, null))) { // 验证成功
                 if (resetPrivateMarkFromAdvancedSetup) { // 验证成功后：修改密码
                     isChangePrivateMark = true;
                     textView1.setText(getString(R.string.set_private_mark));
@@ -243,14 +235,14 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
                 editText1.setText(null);
             }
         } else if (!isFirstRun && isChangePrivateMark) { // 日常修改密码
-            Login.editor.putString(PRIVATE_SPACE_PWD, md5(md5(editText1.getText().toString().trim())));
-            Login.editor.commit();
+            BseApplication.editor.putString(PRIVATE_SPACE_PWD, md5(md5(editText1.getText().toString().trim())));
+            BseApplication.editor.commit();
             isChangePrivateMark = false;
             Toast.makeText(this, getString(R.string.successful_reset_private_mark), Toast.LENGTH_SHORT).show();
             finish();// finish()后露出第一个登录界面 或 高级设置界面
         } else if (isFirstRun) { // 第一次运行app
-            Login.editor.putString(PRIVATE_SPACE_PWD, md5(md5(editText1.getText().toString().trim())));
-            Login.editor.commit();
+            BseApplication.editor.putString(PRIVATE_SPACE_PWD, md5(md5(editText1.getText().toString().trim())));
+            BseApplication.editor.commit();
             Toast.makeText(this, getString(R.string.successful_set_private_mark), Toast.LENGTH_SHORT).show();
             startActivity(new Intent(Login.this, SecurityQuestion.class));
             finish();

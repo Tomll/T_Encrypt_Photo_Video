@@ -12,6 +12,7 @@ import android.widget.VideoView;
 
 import com.example.encrypt.R;
 import com.example.encrypt.activity.BaseActivity;
+import com.example.encrypt.activity.BseApplication;
 import com.example.encrypt.activity.Login;
 
 /**
@@ -40,7 +41,7 @@ public class PrivateVideoPlayActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Login.editor.putBoolean("privVideoAlbumToVideoPlay", false).commit();//还原为false
+        BseApplication.editor.putBoolean("privVideoAlbumToVideoPlay", false).commit();//还原为false
         //解密
         PrivateVideoAlbum.decryptVideosTemporary();
     }

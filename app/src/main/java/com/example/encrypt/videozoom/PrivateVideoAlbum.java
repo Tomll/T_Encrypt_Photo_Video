@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.encrypt.R;
 import com.example.encrypt.activity.BaseActivity;
+import com.example.encrypt.activity.BseApplication;
 import com.example.encrypt.activity.Login;
 import com.example.encrypt.database.DatabaseAdapter;
 import com.example.encrypt.photozoom.Bimp;
@@ -74,7 +75,7 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
     protected void onPause() {
         super.onPause();
         //只要不是去VideoPlay界面产生的onPause（），一律加密
-        if (!Login.sp.getBoolean("privVideoAlbumToVideoPlay", false)) {
+        if (!BseApplication.sp.getBoolean("privVideoAlbumToVideoPlay", false)) {
             encryptVideosTemporary();//退出时，再将视频全部原地加密起来
         }
     }
@@ -109,7 +110,7 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
     static boolean result = true;
 
     public static boolean decryptVideosTemporary() {
-        if (Login.sp.getBoolean("video_encrypt", true)) {//判断是否是加密状态，是，就执行解密
+        if (BseApplication.sp.getBoolean("video_encrypt", true)) {//判断是否是加密状态，是，就执行解密
             //long l2 = System.currentTimeMillis();
             for (final VideoItem item : dateList) {
                 final String privVideoPath = item.getPath(); //这个私密视频的绝对路径
@@ -127,7 +128,7 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
             //long l = System.currentTimeMillis();
             //Log.d("PrivateVideoAlbum", "批量临时解密---循环总耗时:" + (l - l2) + " ms");
             //Log.d("PrivateVideoAlbum", "批量临时解密结果:" + result);
-            Login.editor.putBoolean("video_encrypt", false).commit();
+            BseApplication.editor.putBoolean("video_encrypt", false).commit();
         }
         return result;
     }
@@ -138,7 +139,7 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
     static boolean result1 = true;
 
     public static boolean encryptVideosTemporary() {
-        if (!Login.sp.getBoolean("video_encrypt", false)) {//判断是否是解密状态，是，就执行加密
+        if (!BseApplication.sp.getBoolean("video_encrypt", false)) {//判断是否是解密状态，是，就执行加密
             for (final VideoItem item : dateList) {
                 final String privVideoPath = item.getPath(); //这个私密视频的绝对路径
                 executorService.submit(new Runnable() {
@@ -152,7 +153,7 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
                     }
                 });
             }
-            Login.editor.putBoolean("video_encrypt", true).commit();
+            BseApplication.editor.putBoolean("video_encrypt", true).commit();
         }
         return result1;
     }
