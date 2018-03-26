@@ -10,8 +10,10 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.example.encrypt.R;
+import com.example.encrypt.util.AlipayUtil;
 
 import static com.example.encrypt.activity.Login.ChangePrivateMarkFromAdvancedSetup;
 
@@ -104,6 +106,14 @@ public class AdvancedSetup extends BaseActivity implements View.OnClickListener,
                 break;
             case R.id.rv7: // 使用帮助
                 startActivity(new Intent(AdvancedSetup.this, UseHelp.class));
+                break;
+            case R.id.rv8: // 友情捐助
+                if(AlipayUtil.hasInstalledAlipayClient(AdvancedSetup.this)){
+                    //第二个参数代表要给被支付的二维码code 可以在用草料二维码在线生成
+                    AlipayUtil.startAlipayClient(AdvancedSetup.this, "FKX08718ZXKVQ3OY5FFH09");
+                }else{
+                    Toast.makeText(AdvancedSetup.this,R.string.not_install_alipay,Toast.LENGTH_LONG).show();
+                }
                 break;
         }
     }

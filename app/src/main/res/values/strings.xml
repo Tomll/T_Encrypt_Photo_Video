@@ -9,6 +9,7 @@
     <string name="other_settings">其他设置</string>
     <string name="change_private_mark">更改密码</string>
     <string name="using_help">使用帮助</string>
+    <string name="friendship_donation">友情捐助</string>
     <string name="set_private_mark">设置密码</string>
     <string name="please_set_private_mark">请设置进入私密空间的密码</string>
     <string name="input_private_mark">输入6位密码</string>
@@ -61,6 +62,11 @@
     <string name="private_album">私密相册</string>
     <string name="add_private_photo">添加私密图片</string>
     <string name="click_login_by_finger_print">点击进行指纹登录</string>
+    <string name="set_screenlock_first">请先设置锁屏</string>
+    <string name="record_finger_first">请先录入指纹</string>
+    <string name="finger_verification_success">指纹识别成功</string>
+    <string name="finger_verification_fail">指纹识别失败</string>
+    <string name="not_install_alipay">未安装支付宝</string>
     <string name="private_video_album">私密视频</string>
     <string name="add_private_video">添加私密视频</string>
     <string name="select_video">选择视频</string>
@@ -79,12 +85,4 @@
     <string name="about_uninstall">卸载“私密空间”</string>
     <string name="about_uninstall_des">卸载本软件之前，请务必将加密的文件解密，否则会造成私密文件的丢失，请牢记！</string>
 
-    <!-- contacts -->
-
-    <!-- dialer -->
-
-    <!-- sms -->
-
-    <item type="id" name="tag_recv"></item>
-    <item type="id" name="tag_send"></item>
 </resources>

@@ -370,13 +370,13 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
     //检测指纹是否可用
     public static boolean isFingerEnable(Context context) {
         if (!mKeyManager.isKeyguardSecure()) {
-            Toast.makeText(context, "请先设置锁屏", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.set_screenlock_first, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
             context.startActivity(intent);
             return false;
         }
         if (!mFingerprintManager.hasEnrolledFingerprints()) {
-            Toast.makeText(context, "请先录入指纹", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.record_finger_first, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
             context.startActivity(intent);
             return false;
@@ -400,7 +400,7 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
 
         @Override
         public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
-            Toast.makeText(Login.this, "指纹识别成功", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Login.this, R.string.finger_verification_success, Toast.LENGTH_SHORT).show();
             if (resetPrivateMarkFromAdvancedSetup) { // 验证成功后：修改密码
                 isChangePrivateMark = true;
                 textView1.setText(getString(R.string.set_private_mark));
@@ -416,7 +416,7 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
 
         @Override
         public void onAuthenticationFailed() {
-            Toast.makeText(Login.this, "指纹识别失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Login.this, R.string.finger_verification_fail, Toast.LENGTH_SHORT).show();
             startFingerWrongAnimation();
         }
     };
