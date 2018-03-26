@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.provider.Settings;
@@ -22,7 +23,6 @@ import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -116,7 +116,10 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
      */
     private void initData() {
         mKeyManager = (KeyguardManager) this.getSystemService(Context.KEYGUARD_SERVICE);
-        mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
+        //版本大于6.0才有指纹相关的API,才能初始化指纹管理器
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
+        }
         contentResolver = getContentResolver();
         sp = getSharedPreferences(PRIVATE_SPACE_SP, MODE_PRIVATE);
         editor = sp.edit();
@@ -157,14 +160,17 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
             textView3.setVisibility(View.VISIBLE);
             frameLayout2.setVisibility(View.GONE);
         }
-        //注册指纹监听
-        if (!isFirstRun && hasFingerMode() && sp.getBoolean("enterByPrivateFingerprint", false)
-                && !resetPrivateMarkFromAdvancedSetup && !resetPrivateMarkFromSecurityQuestion) {
-            btFingerprint.setVisibility(View.VISIBLE);
-            tip_finger_print_login.setVisibility(View.VISIBLE);
-        } else if (isFirstRun) {
-            //app首次运行,默认打开指纹登录开关
-            BseApplication.editor.putBoolean("enterByPrivateFingerprint", true).commit();
+        //版本 >= 6.0,才有指纹相关的API,才执行指纹相关逻辑
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            //判断各项指纹使用条件
+            if (!isFirstRun && hasFingerMode() && sp.getBoolean("enterByPrivateFingerprint", false)
+                    && !resetPrivateMarkFromAdvancedSetup && !resetPrivateMarkFromSecurityQuestion) {
+                btFingerprint.setVisibility(View.VISIBLE);
+                tip_finger_print_login.setVisibility(View.VISIBLE);
+            } else if (isFirstRun) {
+                //app首次运行,默认打开指纹登录开关
+                BseApplication.editor.putBoolean("enterByPrivateFingerprint", true).commit();
+            }
         }
     }
 
@@ -384,49 +390,48 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
         return true;
     }
 
-    //指纹验证结果回调
-    FingerprintManager.AuthenticationCallback mAuthCallback = new FingerprintManager.AuthenticationCallback() {
-        @Override
-        public void onAuthenticationError(int errorCode, CharSequence errString) {
-            //但多次指纹密码验证错误后，进入此方法；并且，不能短时间内调用指纹验证
-            Toast.makeText(Login.this, errString, Toast.LENGTH_SHORT).show();
-            //showAuthenticationScreen();
-        }
-
-        @Override
-        public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
-            Toast.makeText(Login.this, helpString, Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
-            Toast.makeText(Login.this, R.string.finger_verification_success, Toast.LENGTH_SHORT).show();
-            if (resetPrivateMarkFromAdvancedSetup) { // 验证成功后：修改密码
-                isChangePrivateMark = true;
-                textView1.setText(getString(R.string.set_private_mark));
-                textView2.setText(getString(R.string.please_set_private_mark));
-                textView3.setVisibility(View.GONE);
-                frameLayout2.setVisibility(View.VISIBLE);
-                editText1.setText(null);
-            } else if (!Login.this.isFinishing()) { // 验证成功后：日常登录,且界面没有finish
-                startActivity(new Intent(Login.this, Main.class));
-                finish();
-            }
-        }
-
-        @Override
-        public void onAuthenticationFailed() {
-            Toast.makeText(Login.this, R.string.finger_verification_fail, Toast.LENGTH_SHORT).show();
-            startFingerWrongAnimation();
-        }
-    };
 
     /**
      * 开启指纹监听
      */
     private void startFingerprint() {
         mCancellationSignal = new CancellationSignal();
-        mFingerprintManager.authenticate(null, mCancellationSignal, 0, mAuthCallback, null);
+        //第四个参数是指纹验证结果回调的匿名内部类
+        mFingerprintManager.authenticate(null, mCancellationSignal, 0, new FingerprintManager.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationError(int errorCode, CharSequence errString) {
+                //但多次指纹密码验证错误后，进入此方法；并且，不能短时间内调用指纹验证
+                Toast.makeText(Login.this, errString, Toast.LENGTH_SHORT).show();
+                //showAuthenticationScreen();
+            }
+
+            @Override
+            public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
+                Toast.makeText(Login.this, helpString, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
+                Toast.makeText(Login.this, R.string.finger_verification_success, Toast.LENGTH_SHORT).show();
+                if (resetPrivateMarkFromAdvancedSetup) { // 验证成功后：修改密码
+                    isChangePrivateMark = true;
+                    textView1.setText(getString(R.string.set_private_mark));
+                    textView2.setText(getString(R.string.please_set_private_mark));
+                    textView3.setVisibility(View.GONE);
+                    frameLayout2.setVisibility(View.VISIBLE);
+                    editText1.setText(null);
+                } else if (!Login.this.isFinishing()) { // 验证成功后：日常登录,且界面没有finish
+                    startActivity(new Intent(Login.this, Main.class));
+                    finish();
+                }
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                Toast.makeText(Login.this, R.string.finger_verification_fail, Toast.LENGTH_SHORT).show();
+                startFingerWrongAnimation();
+            }
+        }, null);
     }
 
     /**

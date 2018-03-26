@@ -1,7 +1,5 @@
 package com.example.encrypt.util;
 
-import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -203,7 +201,6 @@ public class AESEncryptionUtil {
      * 将私密文件解密, 解密后的文件以File的形式返回
      */
     public static File decryptFile2(String sourceFilePath, String destFilePath) {
-        Log.d("AESEncryptionUtil", "hahah");
         FileInputStream in;
         FileOutputStream out;
         File destFile = null;
@@ -233,7 +230,6 @@ public class AESEncryptionUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("AESEncryptionUtil", "destFile.exists():" + destFile.exists());
         return destFile;
     }
 

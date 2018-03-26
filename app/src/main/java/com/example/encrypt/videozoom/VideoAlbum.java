@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -162,7 +161,6 @@ public class VideoAlbum extends BaseActivity implements OnClickListener {
                 try {
                     Thread.sleep(1000);
                     totalTime += 2;
-                    Log.d("EncryptionTask", "totalTime:" + totalTime);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -239,7 +237,7 @@ public class VideoAlbum extends BaseActivity implements OnClickListener {
         //删除系统数据库中该条明文件记录
         contentResolver.delete(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "_id=?", new String[]{item.getId()});
         //将加密后的文件条目插入私密数据库
-        Log.d("VideoAlbum", item.toString());
+        //Log.d("VideoAlbum", item.toString());
         ContentValues contentValues = new ContentValues();
         contentValues.put(PsDatabaseHelper.VideoClumns._ID, Integer.valueOf(item.getId()));
         contentValues.put(PsDatabaseHelper.VideoClumns.DATA, privVideoPath);

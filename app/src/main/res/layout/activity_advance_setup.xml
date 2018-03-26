@@ -36,6 +36,7 @@
                 android:clickable="true"
                 android:foreground="?android:attr/selectableItemBackgroundBorderless"
                 android:onClick="onClick"
+                android:visibility="gone"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp">
 

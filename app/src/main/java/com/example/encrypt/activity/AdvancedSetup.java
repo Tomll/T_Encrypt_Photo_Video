@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -24,14 +25,18 @@ public class AdvancedSetup extends BaseActivity implements View.OnClickListener,
 
     public static FingerprintManager mFingerprintManager;
     RelativeLayout rv1;
-    Switch mSwitch1, /*mSwitch2, mSwitch3,*/mSwitch4;
+    Switch mSwitch1, /*mSwitch2, mSwitch3,*/
+            mSwitch4;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_advance_setup);
         addAppActivity(AdvancedSetup.this);
-        mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
+        //版本大于6.0才有指纹相关的API,才能初始化指纹管理器
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
+        }
         initView();
     }
 
@@ -42,8 +47,9 @@ public class AdvancedSetup extends BaseActivity implements View.OnClickListener,
     @SuppressLint("NewApi")
     private void initView() {
         rv1 = (RelativeLayout) findViewById(R.id.rv1);
-        if (!mFingerprintManager.isHardwareDetected()) {//没有指纹传感器，就把指设置选项GONE掉
-            rv1.setVisibility(View.GONE);
+        //版本大于6.0，并且有指纹模组，那么才显示指纹设置项
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && mFingerprintManager.isHardwareDetected()) {
+            rv1.setVisibility(View.VISIBLE);
         }
         mSwitch1 = (Switch) findViewById(R.id.switch1);
 //        mSwitch2 = (Switch) findViewById(R.id.switch2);
@@ -108,11 +114,11 @@ public class AdvancedSetup extends BaseActivity implements View.OnClickListener,
                 startActivity(new Intent(AdvancedSetup.this, UseHelp.class));
                 break;
             case R.id.rv8: // 友情捐助
-                if(AlipayUtil.hasInstalledAlipayClient(AdvancedSetup.this)){
+                if (AlipayUtil.hasInstalledAlipayClient(AdvancedSetup.this)) {
                     //第二个参数代表要给被支付的二维码code 可以在用草料二维码在线生成
                     AlipayUtil.startAlipayClient(AdvancedSetup.this, "FKX08718ZXKVQ3OY5FFH09");
-                }else{
-                    Toast.makeText(AdvancedSetup.this,R.string.not_install_alipay,Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(AdvancedSetup.this, R.string.not_install_alipay, Toast.LENGTH_LONG).show();
                 }
                 break;
         }

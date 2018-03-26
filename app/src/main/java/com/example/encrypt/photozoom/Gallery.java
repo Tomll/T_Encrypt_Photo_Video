@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -19,7 +18,6 @@ import android.widget.Toast;
 import com.example.encrypt.R;
 import com.example.encrypt.activity.BaseActivity;
 import com.example.encrypt.activity.BseApplication;
-import com.example.encrypt.activity.Login;
 import com.example.encrypt.util.XorEncryptionUtil;
 
 
@@ -117,19 +115,16 @@ public class Gallery extends BaseActivity implements OnClickListener, OnPageChan
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
-                Log.d("SystemKeyEventReceiver", "onReceive");
                 String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
                 if (reason == null) {
                     return;
                 }
                 // Home键
                 if (reason.equals(SYSTEM_DIALOG_REASON_HOME_KEY)) {
-                    Log.d("SystemKeyEventReceiver", "Gallery-home");
                     PrivateAlbum.encryptPhotosTemporary();
                 }
                 // 最近任务列表键
                 if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
-                    Log.d("SystemKeyEventReceiver", "Gallery-recent");
                     PrivateAlbum.encryptPhotosTemporary();
                 }
             }

@@ -57,7 +57,6 @@ public class BitmapCache extends Activity {
 					callback.imageLoad(iv, bmp, sourcePath);
 				}
 				iv.setImageBitmap(bmp);
-				Log.d(TAG, "hit cache");
 				return;
 			}
 		}

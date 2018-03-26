@@ -59,10 +59,10 @@ public class Main extends BaseActivity implements AppRecyclerAdapter.RecycleView
     }
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        Log.d("Main","onKeyUp 744"+event.isLongPress());
+        //Log.d("Main","onKeyUp 744"+event.isLongPress());
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                Log.d("Main","onKeyUp "+keyCode);
+                //Log.d("Main","onKeyUp "+keyCode);
                 for(AppInfo appinfo : appList){
                     if(null != appinfo.getPackageName()&&packageManager.getApplicationEnabledSetting(appinfo.getPackageName())==PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
                         packageManager.setApplicationEnabledSetting(appinfo.getPackageName(), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);

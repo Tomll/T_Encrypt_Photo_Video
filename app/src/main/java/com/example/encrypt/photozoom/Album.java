@@ -200,7 +200,7 @@ public class Album extends BaseActivity implements OnClickListener {
         Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         contentResolver.delete(baseUri, "_id=?", new String[]{item.getImageId()});
         //将加密后的文件条目插入私密数据库
-//        Log.d("VideoAlbum", item.toString());
+        //Log.d("VideoAlbum", item.toString());
         ContentValues contentValues = new ContentValues();
         contentValues.put(PsDatabaseHelper.FilesClumns._ID, Integer.valueOf(item.getImageId()));
         contentValues.put(PsDatabaseHelper.FilesClumns._DATA, privImagePath);
