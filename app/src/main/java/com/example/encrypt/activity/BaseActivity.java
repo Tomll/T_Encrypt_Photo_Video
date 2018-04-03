@@ -1,12 +1,17 @@
 package com.example.encrypt.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.ArrayList;
@@ -26,8 +31,8 @@ public class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();// 隐藏掉ActionBar
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);//隐藏TitleBar
-//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);//透明状态栏
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);//隐藏TitleBar
+        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);//透明状态栏
         receiver = new SystemKeyEventReceiver();
         //注册系统按键广播
         registerReceiver(receiver, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
@@ -35,10 +40,31 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        //检查并请求权限
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1655);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         //反注册广播
         unregisterReceiver(receiver);
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1655) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                exitApp();
+            }
+        }
     }
 
     /**
@@ -68,6 +94,7 @@ public class BaseActivity extends AppCompatActivity {
             }
         }
     }
+
 
     /**
      * 添加Activity到列表中
