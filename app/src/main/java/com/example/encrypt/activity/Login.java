@@ -92,14 +92,23 @@ public class Login extends BaseActivity implements View.OnClickListener, Compoun
         super.onPause();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //将静态变量置空，防止内存泄露的发生
+        mFingerprintManager = null;
+        mKeyManager = null;
+    }
+
     /**
      * 初始化数据
      */
     private void initData() {
-        mKeyManager = (KeyguardManager) this.getSystemService(Context.KEYGUARD_SERVICE);
+        mKeyManager = (KeyguardManager) getApplicationContext().getSystemService(Context.KEYGUARD_SERVICE);
         //版本大于6.0才有指纹相关的API,才能初始化指纹管理器
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
+            //使用getApplicationContext获取系统服务，可以避免Login.this传入FingerPrintManager后导致其一直被持有而造成的内存泄露
+            mFingerprintManager = (FingerprintManager) getApplicationContext().getSystemService(Context.FINGERPRINT_SERVICE);
         }
         contentResolver = getContentResolver();
         sp = getSharedPreferences(PRIVATE_SPACE_SP, MODE_PRIVATE);

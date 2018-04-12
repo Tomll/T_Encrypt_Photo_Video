@@ -40,6 +40,12 @@ public class AdvancedSetup extends BaseActivity implements View.OnClickListener,
         initView();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //将静态变量置空，防止内存泄露发生
+        mFingerprintManager = null;
+    }
 
     /**
      * 初始化view

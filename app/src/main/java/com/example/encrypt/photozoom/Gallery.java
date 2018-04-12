@@ -62,6 +62,8 @@ public class Gallery extends BaseActivity implements OnClickListener, OnPageChan
         super.onDestroy();
         unregisterReceiver(receiver);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        buttonAdd = null;
+        buttonMin = null;
     }
 
     /**

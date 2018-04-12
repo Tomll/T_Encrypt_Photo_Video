@@ -84,6 +84,11 @@ public class PrivateVideoAlbum extends BaseActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         Bimp.tempSelectVideo.clear();
+        //将静态变量置空，防止内存泄露发生
+        dateList = null;
+        databaseAdapter = null;
+        executorService = null;
+        tvNoPicture = null;
     }
 
     /**

@@ -79,6 +79,11 @@ public class PrivateAlbum extends BaseActivity implements View.OnClickListener {
     protected void onDestroy() {
         super.onDestroy();
         Bimp.tempSelectBitmap.clear();
+        //将静态变量置空，防止内存泄露发生
+        dateList = null;
+        databaseAdapter = null;
+        executorService = null;
+        tvNoPicture = null;
     }
 
 /*    *//**

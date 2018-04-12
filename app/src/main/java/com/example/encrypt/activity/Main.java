@@ -53,10 +53,7 @@ public class Main extends BaseActivity implements AppRecyclerAdapter.RecycleView
         super.onPause();
        // packageManager.setApplicationEnabledSetting("cn.wps.moffice_eng", PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
     }
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
+
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         //Log.d("Main","onKeyUp 744"+event.isLongPress());

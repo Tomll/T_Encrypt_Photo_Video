@@ -72,6 +72,10 @@ public class Album extends BaseActivity implements OnClickListener {
         if (null != progressDialog && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
+        //将静态变量置空，防止内存泄露发生
+        dataList = null;
+        databaseAdapter = null;
+        executorService = null;
 /*        if (null != mTask && !mTask.isCancelled()){  注释掉此段，不取消mTask,让加解密在后台继续执行完成
             mTask.cancel(true);
         }*/

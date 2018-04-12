@@ -23,7 +23,7 @@ import java.util.ArrayList;
 public class BaseActivity extends AppCompatActivity {
 
     //应用Activity列表
-    private static ArrayList<Activity> activityList = new ArrayList<Activity>();
+    private ArrayList<Activity> activityList = new ArrayList<Activity>();
     //广播接收器
     private SystemKeyEventReceiver receiver;
 
@@ -101,7 +101,7 @@ public class BaseActivity extends AppCompatActivity {
      *
      * @param activity
      */
-    public static void addAppActivity(Activity activity) {
+    public void addAppActivity(Activity activity) {
         if (!activityList.contains(activity)) {
             activityList.add(activity);
         }
@@ -112,7 +112,7 @@ public class BaseActivity extends AppCompatActivity {
      *
      * @param activity
      */
-    public static void removeAppActivity(Activity activity) {
+    public void removeAppActivity(Activity activity) {
         if (activityList.contains(activity)) {
             activityList.remove(activity);
         }
@@ -121,7 +121,7 @@ public class BaseActivity extends AppCompatActivity {
     /**
      * 退出应用程序
      */
-    public static void exitApp() {
+    public void exitApp() {
         for (Activity ac : activityList) {
             if (!ac.isFinishing()) {
                 ac.finish();

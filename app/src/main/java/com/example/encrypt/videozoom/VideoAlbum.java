@@ -72,6 +72,10 @@ public class VideoAlbum extends BaseActivity implements OnClickListener {
         if (null != progressDialog && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
+        //将静态变量置空，防止内存泄露发生
+        videoList = null;
+        databaseAdapter = null;
+        executorService = null;
         /*if (null != mTask && !mTask.isCancelled()){
             mTask.cancel(true);
         }*/
