@@ -53,7 +53,6 @@
 -keep public class * extends android.support.v4.app.Fragment
 
 #忽略警告
--ignorewarning
 -ignorewarnings
 
 ##记录生成的日志数据,gradle build时在本项目根目录输出##

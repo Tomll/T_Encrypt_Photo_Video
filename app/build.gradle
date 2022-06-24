@@ -9,7 +9,26 @@ android {
         versionCode 2
         versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        //Fix:All flavors must now belong to a named flavor dimension
+        flavorDimensions "default"
     }
+
+    //签名文件配置
+    signingConfigs {
+        debug {
+            storeFile file('../Encrypt.jks')
+            storePassword '365894721'
+            keyPassword '365894721'
+            keyAlias 'key0'
+        }
+        release {
+            storeFile file('../Encrypt.jks')
+            storePassword '365894721'
+            keyPassword '365894721'
+            keyAlias 'key0'
+        }
+    }
+
     buildTypes {
         release {
             buildConfigField "boolean", "LOG_DEBUG", "false" // 不显示Log
@@ -17,8 +36,46 @@ android {
             shrinkResources true  // 移除无用的resource文件
             minifyEnabled true    //开启混淆
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //多渠道打包：apk文件名输出配置
+            applicationVariants.all { variant ->
+                variant.outputs.all {
+                    //outputFileName = "GameleyYouZi_${variant.versionName}_${variant.productFlavors[0].name}.apk"
+                    outputFileName = "PrivacySpace_${variant.versionName}.apk"
+                }
+            }
+        }
+        debug {
+            buildConfigField "boolean", "LOG_DEBUG", "false" // 不显示Log
+            zipAlignEnabled true  //Zipalign优化
+            shrinkResources true  // 移除无用的resource文件
+            minifyEnabled true    //开启混淆
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //多渠道打包：apk文件名输出配置
+            applicationVariants.all { variant ->
+                variant.outputs.all {
+                    //outputFileName = "GameleyYouZi_${variant.versionName}_${variant.productFlavors[0].name}.apk"
+                    outputFileName = "PrivacySpace_${variant.versionName}.apk"
+                }
+            }
         }
     }
+
+    productFlavors {
+        //各母包渠道的applicationId不同,需要分别设置
+        youzi {//柚子小游戏
+            applicationId "com.gameley.youzi"
+            manifestPlaceholders=[app_name:"@string/app_name",app_icon:"@mipmap/ic_launcher"]
+        }
+        leyuan {//柚子乐园-oc
+            applicationId "com.gameley.youzi.oc"
+            manifestPlaceholders=[app_name:"@string/app_name1",app_icon:"@mipmap/ic_launcher"]
+        }
+        baijing {//白鲸乐园
+            applicationId "com.gameley.baijing"
+            manifestPlaceholders=[app_name:"@string/app_name2",app_icon:"@mipmap/ic_launcher"]
+        }
+    }
+
 }
 
 dependencies {
